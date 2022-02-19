@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Bardiamist/pinger/issues"
   },
-  "homepage": "https://github.com/Bardiamist/pinger#readme"
+  "homepage": "https://github.com/Bardiamist/pinger#readme",
+  "dependencies": {
+    "nodemailer": "^6.7.2"
+  }
 }
