@@ -9,8 +9,8 @@ const nodemailer = require('nodemailer');
 const timeoutSeconds = 30;
 const delaySeconds = 10;
 
-const fromEmail = 'fromEmail@gmail.com';
-const toEmail = 'toEmail@gmail.com';
+const fromEmail = 'from@mail.ru';
+const toEmail = 'to@gmail.com';
 
 const hosts = [
   'google.com',
@@ -18,10 +18,12 @@ const hosts = [
 ];
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: "smtp.mail.ru",
+  port: 465,
+  secure: true,
   auth: {
-    user: fromEmail,
-    pass: 'fromEmailPassword'
+    user: fromEmail.split('@')[0],
+    pass: "password"
   }
 });
 
