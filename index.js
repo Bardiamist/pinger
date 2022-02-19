@@ -2,7 +2,7 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec);
 const nodemailer = require('nodemailer');
 
-const timeoutSeconds = 60;
+const timeoutSeconds = 30;
 const delaySeconds = 10;
 
 const fromEmail = 'fromEmail@gmail.com';
@@ -25,16 +25,17 @@ const isTimeoutByHost = {};
 const timeByHost = {};
 
 const report = (subject, text) => {
-  transporter.sendMail({
-    from: fromEmail,
-    to: toEmail,
-    subject,
-    text,
-  }, (exception) => {
-    if (exception != null) {
-      console.error(exception);
-    }
-  });
+  console.log({subject, text});
+  // transporter.sendMail({
+  //   from: fromEmail,
+  //   to: toEmail,
+  //   subject,
+  //   text,
+  // }, (exception) => {
+  //   if (exception != null) {
+  //     console.error(exception);
+  //   }
+  // });
 };
 
 const ping = async (host) => {
@@ -53,12 +54,14 @@ const ping = async (host) => {
     const time = Date.now();
 
     if (prevTime != null) {
-      const seconds = time - prevTime / 1000;
+      const seconds = (time - prevTime) / 1000;
 
       if (seconds > timeoutSeconds) {
-        isTimeoutByHost[host] = true;
+        if (!isTimeoutByHost[host]) {
+          isTimeoutByHost[host] = true;
 
-        report(`${host} не пингуется`, `${host} уже ${seconds} секунд не пингуется`);
+          report(`${host} не пингуется`, `${host} уже ${seconds} секунд не пингуется`);
+        }
       }
     } else {
       timeByHost[host] = time;
