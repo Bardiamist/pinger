@@ -9,6 +9,7 @@ const hosts = [
   '192.168.10.20',
 ];
 
+const isTimeoutByHost = {};
 const timeByHost = {};
 
 const ping = async (host) => {
@@ -16,12 +17,20 @@ const ping = async (host) => {
     await exec(`ping ${host}`);
 
     timeByHost[host] = Date.now();
+
+    if (isTimeoutByHost[host] != null) {
+      delete isTimeoutByHost[host];
+
+      console.log('Снова пингуется');
+    }
   } catch (exception) {
     const prevTime = timeByHost[host];
     const time = Date.now();
 
     if (prevTime != null) {
       if (time - prevTime > timeoutSeconds * 1000) {
+        isTimeoutByHost[host] = true;
+
         console.log('Не пингуется');
       }
     } else {
