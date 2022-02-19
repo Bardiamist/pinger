@@ -2,6 +2,10 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec);
 const nodemailer = require('nodemailer');
 
+/**
+ * Config start
+ */
+
 const timeoutSeconds = 30;
 const delaySeconds = 10;
 
@@ -21,21 +25,30 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const getFailSubject = (host) => `${host} не пингуется`;
+const getFailText = (host, seconds) => `${host} уже ${seconds} секунд не пингуется`;
+
+const getSeccessSubject = (host) => `${host} снова пингуется`;
+const successText = 'Алилуя';
+
+/**
+ * Config end
+ */
+
 const isTimeoutByHost = {};
 const timeByHost = {};
 
 const report = (subject, text) => {
-  console.log({subject, text});
-  // transporter.sendMail({
-  //   from: fromEmail,
-  //   to: toEmail,
-  //   subject,
-  //   text,
-  // }, (exception) => {
-  //   if (exception != null) {
-  //     console.error(exception);
-  //   }
-  // });
+  transporter.sendMail({
+    from: fromEmail,
+    to: toEmail,
+    subject,
+    text,
+  }, (exception) => {
+    if (exception != null) {
+      console.error(exception);
+    }
+  });
 };
 
 const ping = async (host) => {
@@ -47,7 +60,7 @@ const ping = async (host) => {
     if (isTimeoutByHost[host] != null) {
       delete isTimeoutByHost[host];
 
-      report(`${host} снова пингуется`, 'Алилуя');
+      report(getSeccessSubject(host), successText);
     }
   } catch (exception) {
     const prevTime = timeByHost[host];
@@ -60,7 +73,7 @@ const ping = async (host) => {
         if (!isTimeoutByHost[host]) {
           isTimeoutByHost[host] = true;
 
-          report(`${host} не пингуется`, `${host} уже ${seconds} секунд не пингуется`);
+          report(getFailSubject(host), getFailText(host, seconds));
         }
       }
     } else {
