@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer');
  * Config start
  */
 
-const timeoutSeconds = 30;
+const timeoutSeconds = 10;
 const delaySeconds = 10;
 
 const fromEmail = 'from@mail.ru';
@@ -37,10 +37,10 @@ const successText = 'Алилуя';
  * Config end
  */
 
-const isTimeoutByHost = {};
+const isEmailSentByHost = {};
 const timeByHost = {};
 
-const report = (subject, text) => {
+const report = (subject, text, callback) => {
   transporter.sendMail({
     from: fromEmail,
     to: toEmail,
@@ -49,6 +49,8 @@ const report = (subject, text) => {
   }, (exception) => {
     if (exception != null) {
       console.error(exception);
+    } else if (callback != null) {
+      callback();
     }
   });
 };
@@ -59,8 +61,8 @@ const ping = async (host) => {
 
     timeByHost[host] = Date.now();
 
-    if (isTimeoutByHost[host] != null) {
-      delete isTimeoutByHost[host];
+    if (isEmailSentByHost[host] != null) {
+      delete isEmailSentByHost[host];
 
       report(getSeccessSubject(host), successText);
     }
@@ -71,12 +73,10 @@ const ping = async (host) => {
     if (prevTime != null) {
       const seconds = (time - prevTime) / 1000;
 
-      if (seconds > timeoutSeconds) {
-        if (!isTimeoutByHost[host]) {
-          isTimeoutByHost[host] = true;
-
-          report(getFailSubject(host), getFailText(host, seconds));
-        }
+      if (seconds > timeoutSeconds && !isEmailSentByHost[host]) {
+        report(getFailSubject(host), getFailText(host, seconds), () => {
+          isEmailSentByHost[host] = true;
+        });
       }
     } else {
       timeByHost[host] = time;
